@@ -12,8 +12,29 @@ section .data
     msg4 db "Vai trabalhar com 16 ou 32 bits (digite 0 para 16, e 1 para 32):", 0dh, 0ah
     msg4_sz equ $-msg4
 
-    menu db "ESCOLHA UMA OPCAO:", 0dh, 0ah, "- 1: SOMA", 0dh, 0ah, "- 2: SUBTRACAO", 0dh, 0ah, "- 3: MULTIPLICACAO", 0dh, 0ah, "- 4: DIVISAO", 0dh, 0ah, "- 5: EXPONENCIACAO", 0dh, 0ah, "- 6: MOD", 0dh, 0ah, "- 7: SAIR", 0dh, 0ah
-    menu_sz equ $-menu
+    menu0 db "ESCOLHA UMA OPCAO:", 0dh, 0ah
+    menu0_sz equ $-menu0
+
+    menu1 db "- 1: SOMA", 0dh, 0ah
+    menu1_sz equ $-menu1
+
+    menu2 db "- 2: SUBTRACAO", 0dh, 0ah
+    menu2_sz equ $-menu2
+
+    menu3 db "- 3: MULTIPLICACAO", 0dh, 0ah
+    menu3_sz equ $-menu3
+
+    menu4 db "- 4: DIVISAO", 0dh, 0ah
+    menu4_sz equ $-menu4
+
+    menu5 db "- 5: EXPONENCIACAO", 0dh, 0ah
+    menu5_sz equ $-menu5
+
+    menu6 db "- 6: MOD", 0dh, 0ah
+    menu6_sz equ $-menu6
+
+    menu7 db "- 7: SAIR", 0dh, 0ah
+    menu7_sz equ $-menu7
 
 section .bss
 
@@ -54,9 +75,7 @@ _start:
     push 1
     call read_msg
 
-    push menu
-    push menu_sz
-    call print_msg
+    call print_menu
 
     push operacao
     push 1
@@ -66,9 +85,43 @@ _start:
     mov ebx, 0
     int 80h
 
+print_menu:
+    push menu0
+    push menu0_sz
+    call print_msg
+
+    push menu1
+    push menu1_sz
+    call print_msg
+
+    push menu2
+    push menu2_sz
+    call print_msg
+
+    push menu3
+    push menu3_sz
+    call print_msg
+
+    push menu4
+    push menu4_sz
+    call print_msg
+
+    push menu5
+    push menu5_sz
+    call print_msg
+
+    push menu6
+    push menu6_sz
+    call print_msg
+
+    push menu7
+    push menu7_sz
+    call print_msg
+
+    ret
+
 print_msg:
-    push ebp
-    mov ebp, esp
+    enter 0, 0
 
     mov eax, 4
     mov ebx, 1
@@ -76,14 +129,13 @@ print_msg:
     mov edx, [ebp+8]
     int 80h
 
-    pop ebp
+    leave
     ret 8
 
 read_msg: 
     ; está lendo o \n no fim do input :-(
     ; utilizar o CTRL-D por enquanto
-    push ebp
-    mov ebp, esp
+    enter 0, 0
 
     mov eax, 3
     mov ebx, 0
@@ -91,5 +143,5 @@ read_msg:
     mov edx, [ebp+8]
     int 80h
 
-    pop ebp
+    leave
     ret 8
