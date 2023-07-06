@@ -45,6 +45,11 @@ section .bss
 section .text
 
     global _start
+    global read_num
+    
+    extern soma16
+    extern soma32
+
 
 _start:
     push msg1
@@ -135,6 +140,18 @@ print_msg:
 read_msg: 
     ; está lendo o \n no fim do input :-(
     ; utilizar o CTRL-D por enquanto
+    enter 0, 0
+
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, [ebp+12]
+    mov edx, [ebp+8]
+    int 80h
+
+    leave
+    ret 8
+
+read_num:
     enter 0, 0
 
     mov eax, 3
