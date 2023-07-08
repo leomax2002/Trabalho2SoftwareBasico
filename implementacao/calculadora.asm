@@ -42,6 +42,8 @@ section .bss
     precisao resb 1
     operacao resb 1
 
+    entrada resb 12
+
 section .text
 
     global _start
@@ -123,6 +125,11 @@ print_menu:
     push menu7_sz
     call print_msg
 
+    call read_num
+    push eax
+    push 30
+    call print_msg
+    
     ret
 
 print_msg:
@@ -151,14 +158,28 @@ read_msg:
     leave
     ret 8
 
+; converte o str de entrada em int em EAX
 read_num:
     enter 0, 0
 
     mov eax, 3
     mov ebx, 0
-    mov ecx, [ebp+12]
-    mov edx, [ebp+8]
+    mov ecx, entrada
+    mov edx, 12
     int 80h
 
+    mov ecx, entrada
+    .next_digit_loop:
+    movzx ebx, byte [ecx]
+    sub ebx, '0'
+    cmp bl, 9
+    ja .not_digit
+
+    imul eax, 10
+    add eax, ebx
+    inc ecx
+    jmp .next_digit_loop
+
+    .not_digit:
     leave
-    ret 8
+    ret
