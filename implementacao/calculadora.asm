@@ -45,9 +45,12 @@ section .bss
 section .text
 
     global _start
+
+    global read_num_16
     global read_num_32
-    global print_num
-    global next_operation
+
+    global print_num_16
+    global print_num_32
 
     extern soma16
     extern soma32
@@ -55,6 +58,7 @@ section .text
     extern subtracao16
     extern subtracao32
 
+%define param1_16 word [ebp+6]
 %define param1 dword [ebp+8]
 %define param2 dword [ebp+12]
 
@@ -205,7 +209,6 @@ read_msg:
 
 ; lê uma string da entrada e o converte em int (signed),
 ; retornado esse valor em complemento de 2 pelo registrador EAX
-
 read_num_32:
     enter 0, 0
     sub esp, 16 ; allocate space 16B
@@ -256,8 +259,59 @@ read_num_32:
     leave
     ret
 
+; Versao 16
+read_num_16:
+    enter 0, 0
+    sub esp, 16 ; allocate space 16B
+
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, esp
+    mov edx, 16
+    int 80h
+
+    mov ecx, 0 ; offset
+    mov ax, 0 ; stored value
+    movzx bx, byte [esp]; first char (can be + or -)
+
+    cmp bx, 43 ; '+'
+    je .skip_first
+
+    cmp bx, 45 ; '-'
+    je .skip_first
+
+    jmp .next_digit
+
+    .skip_first:
+    add ecx, 1
+
+    .next_digit:
+    movzx bx, byte [esp+ecx]
+    sub bx, '0'
+    cmp bl, 9
+    ja .not_digit
+
+    imul ax, 10
+    add ax, bx
+    add ecx, 1
+    jmp .next_digit
+
+    .not_digit:
+    movzx bx, byte [esp]
+    cmp bx, 45 ; '-'
+    jne .positive
+
+    .negative:
+    xor ax, 0xffff ; invert
+    add ax, 1 ; get 2's complement
+
+    .positive:
+    add esp, 16 ; restore stack
+    leave
+    ret
+
 ; converte o int armazenado no parâmetro passado para a função em str (signed) e imprime
-print_num:
+print_num_32:
     enter 0, 0
     sub esp, 16 ; allocate space 16B
     
@@ -286,6 +340,53 @@ print_num:
     jnz .prev_digit
 
     cmp param1, 0
+    jge .positive2
+
+    sub ebx, 1
+    mov [esp+ebx], byte 45
+
+    .positive2:
+    mov eax, 4
+    lea ecx, [esp+ebx]
+    mov edx, 16
+    sub edx, ebx
+    mov ebx, 1
+    int 80h
+
+    add esp, 16 ; restore stack
+    leave
+    ret 4 ; 1 parameter
+
+; converte o int armazenado no parâmetro passado para a função em str (signed) e imprime
+print_num_16:
+    enter 0, 0
+    sub esp, 16 ; allocate space 16B
+    
+    mov ax, param1_16 ; dividend and quotient
+    cmp param1_16, 0
+    jge .positive1
+
+    xor ax, 0xffff
+    add ax, 1
+
+    .positive1:
+    mov cx, 10 ; divisor
+    
+    mov [esp+15], byte 0 ; '\0' null terminator
+    mov [esp+14], byte 0xa ; LF
+    mov [esp+13], byte 0xd ; CR
+    mov ebx, 13 ; string starting offset
+
+    .prev_digit:
+    xor dx, dx ; edx stores the remainder of eax/ecx
+    div cx
+    add dl, '0'
+    sub ebx, 1
+    mov [esp+ebx], dl
+    test ax, ax ; while( eax > 0)
+    jnz .prev_digit
+
+    cmp param1_16, 0
     jge .positive2
 
     sub ebx, 1
