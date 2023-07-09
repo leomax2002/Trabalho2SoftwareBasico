@@ -58,6 +58,18 @@ section .text
     extern subtracao16
     extern subtracao32
 
+    extern multiplicacao16
+    extern multiplicacao32
+
+    extern divisao16
+    extern divisao32
+
+    extern exponenciacao16
+    extern exponenciacao32
+
+    extern mod16
+    extern mod32
+
 %define param1_16 word [ebp+6]
 %define param1 dword [ebp+8]
 %define param2 dword [ebp+12]
@@ -109,6 +121,14 @@ _start:
     je op_add
     cmp byte [operacao], '2'
     je op_sub
+    cmp byte [operacao], '3'
+    je op_mul
+    cmp byte [operacao], '4'
+    je op_div
+    cmp byte [operacao], '5'
+    je op_exp
+    cmp byte [operacao], '6'
+    je op_mod
 
     ; .op_exit: syscall exit, return 0
     mov eax, 1
@@ -141,6 +161,50 @@ _start:
 
         .32:
         call subtracao32
+        jmp continue
+
+    op_mul:
+        cmp byte [precisao], '1'
+        je .32
+
+        call multiplicacao16
+        jmp continue
+
+        .32:
+        call multiplicacao32
+        jmp continue
+
+    op_div:
+        cmp byte [precisao], '1'
+        je .32
+
+        call divisao16
+        jmp continue
+
+        .32:
+        call divisao32
+        jmp continue
+
+    op_exp:
+        cmp byte [precisao], '1'
+        je .32
+
+        call exponenciacao16
+        jmp continue
+
+        .32:
+        call exponenciacao32
+        jmp continue
+
+    op_mod:
+        cmp byte [precisao], '1'
+        je .32
+
+        call mod16
+        jmp continue
+
+        .32:
+        call mod32
         jmp continue
 
 print_menu:
