@@ -46,7 +46,9 @@ section .text
 
     global _start
     global read_num
-    
+    global print_num
+    global next_operation
+
     extern soma16
     extern soma32
 
@@ -89,6 +91,7 @@ _start:
     call read_msg
 
     ; imprime o menu
+    next_operation:
     call print_menu
 
     ; lê a operação
@@ -96,13 +99,17 @@ _start:
     push 4
     call read_msg
 
-    ; lê um numero
-    call read_num
+    cmp byte [operacao], '1'
+    jne .not_1
+    
+    cmp byte [precisao], '0'
+    je soma16
+    cmp byte [precisao], '1'
+    je soma32
 
-    ; imprime um numero
-    push eax
-    call print_num
+    .not_1:
 
+    ; syscall exit, return 0
     mov eax, 1
     mov ebx, 0
     int 80h
@@ -221,9 +228,10 @@ print_num:
     jnz .prev_digit
 
     mov eax, 4
-    mov ebx, 1
     lea ecx, [esp+ebx]
     mov edx, 16
+    sub edx, ebx
+    mov ebx, 1
     int 80h
 
     add esp, 16 ; restore stack
