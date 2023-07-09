@@ -45,7 +45,7 @@ section .bss
 section .text
 
     global _start
-    global read_num
+    global read_num_32
     global print_num
     global next_operation
 
@@ -203,8 +203,10 @@ read_msg:
     leave
     ret 8
 
-; converte o str de numero_str em int em EAX (unsigned)
-read_num:
+; lê uma string da entrada e o converte em int (signed),
+; retornado esse valor em complemento de 2 pelo registrador EAX
+
+read_num_32:
     enter 0, 0
     sub esp, 16 ; allocate space 16B
 
@@ -216,6 +218,18 @@ read_num:
 
     mov ecx, 0 ; offset
     mov eax, 0 ; stored value
+    movzx ebx, byte [esp]; first char (can be + or -)
+
+    cmp ebx, 43 ; '+'
+    je .skip_first
+
+    cmp ebx, 95 ; '-'
+    je .skip_first
+
+    jmp .next_digit
+
+    .skip_first:
+    add ecx, 1
 
     .next_digit:
     movzx ebx, byte [esp+ecx]
@@ -229,11 +243,20 @@ read_num:
     jmp .next_digit
 
     .not_digit:
+    movzx ebx, byte [esp]
+    cmp ebx, 95 ; '-'
+    jne .positive
+
+    .negative:
+    xor eax, 0xffffffff ; invert
+    add eax, 1 ; get 2's complement
+
+    .positive:
     add esp, 16 ; restore stack
     leave
     ret
 
-; converte o int em str e imprime (unsigned)
+; converte o int armazenado no parâmetro passado para a função em str (signed) e imprime
 print_num:
     enter 0, 0
     sub esp, 16 ; allocate space 16B

@@ -3,7 +3,7 @@ section .text
     global subtracao16
     global subtracao32
     
-    extern read_num
+    extern read_num_32
     extern print_num
 
 %define local1 dword [ebp+8]
@@ -12,7 +12,7 @@ section .text
 subtracao16:
     enter 0, 0
     ; lê um numero
-    call read_num
+    call read_num_32
 
     ; imprime um numero
     push eax
@@ -24,7 +24,7 @@ subtracao16:
 subtracao32:
     enter 0, 0
     ; lê um numero
-    call read_num
+    call read_num_32
 
     ; imprime um numero
     push eax
