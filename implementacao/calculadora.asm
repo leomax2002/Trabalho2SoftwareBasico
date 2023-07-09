@@ -223,7 +223,7 @@ read_num_32:
     cmp ebx, 43 ; '+'
     je .skip_first
 
-    cmp ebx, 95 ; '-'
+    cmp ebx, 45 ; '-'
     je .skip_first
 
     jmp .next_digit
@@ -244,7 +244,7 @@ read_num_32:
 
     .not_digit:
     movzx ebx, byte [esp]
-    cmp ebx, 95 ; '-'
+    cmp ebx, 45 ; '-'
     jne .positive
 
     .negative:
@@ -262,6 +262,13 @@ print_num:
     sub esp, 16 ; allocate space 16B
     
     mov eax, param1 ; dividend and quotient
+    cmp param1, 0
+    jge .positive1
+
+    xor eax, 0xffffffff
+    add eax, 1
+
+    .positive1:
     mov ecx, 10 ; divisor
     
     mov [esp+15], byte 0 ; '\0' null terminator
@@ -278,6 +285,13 @@ print_num:
     test eax, eax ; while( eax > 0)
     jnz .prev_digit
 
+    cmp param1, 0
+    jge .positive2
+
+    sub ebx, 1
+    mov [esp+ebx], byte 45
+
+    .positive2:
     mov eax, 4
     lea ecx, [esp+ebx]
     mov edx, 16
