@@ -52,6 +52,7 @@ section .text
     extern soma16
     extern soma32
 
+
 %define param1 dword [ebp+8]
 %define param2 dword [ebp+12]
 
@@ -169,6 +170,38 @@ read_msg:
     leave
     ret 8
 
+; ; converte o str do terminal em int em EAX (unsigned)
+; read_num:
+;     enter 0, 0
+
+;     sub esp, 20 ; allocate space 20B
+;     mov [esp+16], byte 0 ; '/0' null termintor if needed
+
+;     mov eax, 3
+;     mov ebx, 0
+;     mov ecx, esp
+;     mov edx, 16
+;     int 80h
+
+;     mov esi, esp
+;     xor eax, eax ; clear eax
+
+;     .next_digit:
+;     movzx ebx, byte [esi]
+;     sub ebx, '0' ; does signed subtraction
+;     cmp bl, 9
+;     ja .not_digit ; unsigned comparisson > 9
+
+;     imul eax, 10
+;     add eax, ebx
+;     inc esi
+;     jmp .next_digit
+
+;     .not_digit:
+;     add esp, 20 ; deallocate 20B
+;     leave
+;     ret
+
 ; converte o str de numero_str em int em EAX (unsigned)
 read_num:
     enter 0, 0
@@ -200,18 +233,15 @@ read_num:
 ; converte o int em str e imprime (unsigned)
 print_num:
     enter 0, 0
+    sub esp, 16 ; allocate space 16B
     
     mov eax, param1 ; dividend and quotient
-    sub esp, 16 ; allocate space 16B
     mov ecx, 10 ; divisor
-    mov ebx, 16 ; string size 
-
-    sub ebx, 1
-    mov [esp+ebx], byte 0 ; '\0' null terminator
-    sub ebx, 1
-    mov [esp+ebx], byte 0ah ; LF
-    sub ebx, 1
-    mov [esp+ebx], byte 0dh ; CR
+    
+    mov [esp+15], byte 0 ; '\0' null terminator
+    mov [esp+14], byte 0ah ; LF
+    mov [esp+13], byte 0dh ; CR
+    mov ebx, 13 ; string starting offset
 
     .prev_digit:
     xor edx, edx ; edx stores the remainder of eax/ecx
@@ -219,7 +249,7 @@ print_num:
     add dl, '0'
     sub ebx, 1
     mov [esp+ebx], dl
-    test eax, eax 
+    test eax, eax ; while( eax > 0)
     jnz .prev_digit
 
     mov eax, 4
@@ -229,6 +259,5 @@ print_num:
     int 80h
 
     add esp, 16 ; restore stack
-
     leave
     ret 4 ; 1 parameter
