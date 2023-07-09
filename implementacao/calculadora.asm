@@ -39,10 +39,10 @@ section .data
 section .bss
 
     usuario resb 16
-    precisao resb 1
-    operacao resb 1
+    precisao resb 4 ; num + CR + LF + \0
+    operacao resb 4
 
-    entrada resb 12
+    numero_str resb 16 ; remove afterwards ?
 
 section .text
 
@@ -52,16 +52,21 @@ section .text
     extern soma16
     extern soma32
 
+%define param1 dword [ebp+8]
+%define param2 dword [ebp+12]
 
 _start:
+    ; imprime "Bem-vindo. Digite seu nome:"
     push msg1
     push msg1_sz
     call print_msg
 
+    ; lê o nome
     push usuario
     push 16
     call read_msg
 
+    ; imprime "Hola, <nome>, bem-vindo ao programa de CALC IA-32"
     push msg2
     push msg2_sz
     call print_msg
@@ -74,19 +79,30 @@ _start:
     push msg3_sz
     call print_msg
 
+    ; imprime "Vai trabalhar com 16 ou 32 bits (digite 0 para 16, e 1 para 32):"
     push msg4
     push msg4_sz
     call print_msg
 
+    ; lê precisao
     push precisao
-    push 1
+    push 4
     call read_msg
 
+    ; imprime o menu
     call print_menu
 
+    ; lê a operação
     push operacao
-    push 1
+    push 4
     call read_msg
+
+    ; lê um numero
+    call read_num
+
+    ; imprime um numero
+    push eax
+    call print_num
 
     mov eax, 1
     mov ebx, 0
@@ -124,11 +140,6 @@ print_menu:
     push menu7
     push menu7_sz
     call print_msg
-
-    call read_num
-    push eax
-    push 30
-    call print_msg
     
     ret
 
@@ -137,8 +148,8 @@ print_msg:
 
     mov eax, 4
     mov ebx, 1
-    mov ecx, [ebp+12]
-    mov edx, [ebp+8]
+    mov ecx, param2
+    mov edx, param1
     int 80h
 
     leave
@@ -151,35 +162,73 @@ read_msg:
 
     mov eax, 3
     mov ebx, 0
-    mov ecx, [ebp+12]
-    mov edx, [ebp+8]
+    mov ecx, param2
+    mov edx, param1
     int 80h
 
     leave
     ret 8
 
-; converte o str de entrada em int em EAX
+; converte o str de numero_str em int em EAX (unsigned)
 read_num:
     enter 0, 0
 
     mov eax, 3
     mov ebx, 0
-    mov ecx, entrada
-    mov edx, 12
+    mov ecx, numero_str
+    mov edx, 16
     int 80h
 
-    mov ecx, entrada
-    .next_digit_loop:
-    movzx ebx, byte [ecx]
+    mov esi, numero_str
+    mov eax, 0
+
+    .next_digit:
+    movzx ebx, byte [esi]
     sub ebx, '0'
     cmp bl, 9
     ja .not_digit
 
     imul eax, 10
     add eax, ebx
-    inc ecx
-    jmp .next_digit_loop
+    inc esi
+    jmp .next_digit
 
     .not_digit:
     leave
     ret
+
+; converte o int em str e imprime (unsigned)
+print_num:
+    enter 0, 0
+    
+    mov eax, param1 ; dividend and quotient
+    sub esp, 16 ; allocate space 16B
+    mov ecx, 10 ; divisor
+    mov ebx, 16 ; string size 
+
+    sub ebx, 1
+    mov [esp+ebx], byte 0 ; '\0' null terminator
+    sub ebx, 1
+    mov [esp+ebx], byte 0ah ; LF
+    sub ebx, 1
+    mov [esp+ebx], byte 0dh ; CR
+
+    .prev_digit:
+    xor edx, edx ; edx stores the remainder of eax/ecx
+    div ecx
+    add dl, '0'
+    sub ebx, 1
+    mov [esp+ebx], dl
+    test eax, eax 
+    jnz .prev_digit
+
+    mov eax, 4
+    mov ebx, 1
+    lea ecx, [esp+ebx]
+    mov edx, 16
+    int 80h
+
+    add esp, 16 ; restore stack
+
+    leave
+    ret 4 ; 1 parameter
