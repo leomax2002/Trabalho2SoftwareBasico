@@ -1,7 +1,7 @@
 section .text
 
-    global soma16
-    global soma32
+    global subtracao16
+    global subtracao32
     
     extern read_num
     extern print_num
@@ -9,7 +9,7 @@ section .text
 %define local1 dword [ebp+8]
 %define local2 dword [ebp+12]
 
-soma16:
+subtracao16:
     enter 0, 0
     ; lê um numero
     call read_num
@@ -21,7 +21,7 @@ soma16:
     leave
     ret
 
-soma32:
+subtracao32:
     enter 0, 0
     ; lê um numero
     call read_num

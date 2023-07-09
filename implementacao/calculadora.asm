@@ -52,6 +52,8 @@ section .text
     extern soma16
     extern soma32
 
+    extern subtracao16
+    extern subtracao32
 
 %define param1 dword [ebp+8]
 %define param2 dword [ebp+12]
@@ -91,7 +93,7 @@ _start:
     call read_msg
 
     ; imprime o menu
-    next_operation:
+    new_operation:
     call print_menu
 
     ; lê a operação
@@ -100,21 +102,46 @@ _start:
     call read_msg
 
     cmp byte [operacao], '1'
-    jne .not_1
-    
-    cmp byte [precisao], '0'
-    je soma16
-    cmp byte [precisao], '1'
-    je soma32
+    je op_add
+    cmp byte [operacao], '2'
+    je op_sub
 
-    .not_1:
-
-    ; syscall exit, return 0
+    ; .op_exit: syscall exit, return 0
     mov eax, 1
     mov ebx, 0
     int 80h
 
+    continue:
+    push operacao
+    push 4
+    call read_msg ; waits for an ENTER '\n'
+    jmp new_operation
+
+    op_add:
+        cmp byte [precisao], '1'
+        je .32
+
+        call soma16
+        jmp continue
+
+        .32:
+        call soma32
+        jmp continue
+
+    op_sub:
+        cmp byte [precisao], '1'
+        je .32
+
+        call subtracao16
+        jmp continue
+
+        .32:
+        call subtracao32
+        jmp continue
+
 print_menu:
+    enter 0, 0
+
     push menu0
     push menu0_sz
     call print_msg
@@ -147,6 +174,7 @@ print_menu:
     push menu7_sz
     call print_msg
     
+    leave
     ret
 
 print_msg:
