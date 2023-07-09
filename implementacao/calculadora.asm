@@ -42,8 +42,6 @@ section .bss
     precisao resb 4 ; num + CR + LF + \0
     operacao resb 4
 
-    numero_str resb 16 ; remove afterwards ?
-
 section .text
 
     global _start
@@ -170,63 +168,33 @@ read_msg:
     leave
     ret 8
 
-; ; converte o str do terminal em int em EAX (unsigned)
-; read_num:
-;     enter 0, 0
-
-;     sub esp, 20 ; allocate space 20B
-;     mov [esp+16], byte 0 ; '/0' null termintor if needed
-
-;     mov eax, 3
-;     mov ebx, 0
-;     mov ecx, esp
-;     mov edx, 16
-;     int 80h
-
-;     mov esi, esp
-;     xor eax, eax ; clear eax
-
-;     .next_digit:
-;     movzx ebx, byte [esi]
-;     sub ebx, '0' ; does signed subtraction
-;     cmp bl, 9
-;     ja .not_digit ; unsigned comparisson > 9
-
-;     imul eax, 10
-;     add eax, ebx
-;     inc esi
-;     jmp .next_digit
-
-;     .not_digit:
-;     add esp, 20 ; deallocate 20B
-;     leave
-;     ret
-
 ; converte o str de numero_str em int em EAX (unsigned)
 read_num:
     enter 0, 0
+    sub esp, 16 ; allocate space 16B
 
     mov eax, 3
     mov ebx, 0
-    mov ecx, numero_str
+    mov ecx, esp
     mov edx, 16
     int 80h
 
-    mov esi, numero_str
-    mov eax, 0
+    mov ecx, 0 ; offset
+    mov eax, 0 ; stored value
 
     .next_digit:
-    movzx ebx, byte [esi]
+    movzx ebx, byte [esp+ecx]
     sub ebx, '0'
     cmp bl, 9
     ja .not_digit
 
     imul eax, 10
     add eax, ebx
-    inc esi
+    add ecx, 1
     jmp .next_digit
 
     .not_digit:
+    add esp, 16 ; restore stack
     leave
     ret
 
