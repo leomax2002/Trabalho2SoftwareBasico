@@ -1,39 +1,39 @@
 section .data
 
-    msg1 db "Bem-vindo. Digite seu nome:", 0dh, 0ah
+    msg1 db "Bem-vindo. Digite seu nome:", 0xd, 0xa
     msg1_sz equ $-msg1
 
     msg2 db "Hola, "
     msg2_sz equ $-msg2
 
-    msg3 db ", bem-vindo ao programa de CALC IA-32", 0dh, 0ah
+    msg3 db ", bem-vindo ao programa de CALC IA-32", 0xd, 0xa
     msg3_sz equ $-msg3
 
-    msg4 db "Vai trabalhar com 16 ou 32 bits (digite 0 para 16, e 1 para 32):", 0dh, 0ah
+    msg4 db "Vai trabalhar com 16 ou 32 bits (digite 0 para 16, e 1 para 32):", 0xd, 0xa
     msg4_sz equ $-msg4
 
-    menu0 db "ESCOLHA UMA OPCAO:", 0dh, 0ah
+    menu0 db "ESCOLHA UMA OPCAO:", 0xd, 0xa
     menu0_sz equ $-menu0
 
-    menu1 db "- 1: SOMA", 0dh, 0ah
+    menu1 db "- 1: SOMA", 0xd, 0xa
     menu1_sz equ $-menu1
 
-    menu2 db "- 2: SUBTRACAO", 0dh, 0ah
+    menu2 db "- 2: SUBTRACAO", 0xd, 0xa
     menu2_sz equ $-menu2
 
-    menu3 db "- 3: MULTIPLICACAO", 0dh, 0ah
+    menu3 db "- 3: MULTIPLICACAO", 0xd, 0xa
     menu3_sz equ $-menu3
 
-    menu4 db "- 4: DIVISAO", 0dh, 0ah
+    menu4 db "- 4: DIVISAO", 0xd, 0xa
     menu4_sz equ $-menu4
 
-    menu5 db "- 5: EXPONENCIACAO", 0dh, 0ah
+    menu5 db "- 5: EXPONENCIACAO", 0xd, 0xa
     menu5_sz equ $-menu5
 
-    menu6 db "- 6: MOD", 0dh, 0ah
+    menu6 db "- 6: MOD", 0xd, 0xa
     menu6_sz equ $-menu6
 
-    menu7 db "- 7: SAIR", 0dh, 0ah
+    menu7 db "- 7: SAIR", 0xd, 0xa
     menu7_sz equ $-menu7
 
 section .bss
@@ -265,8 +265,8 @@ print_num:
     mov ecx, 10 ; divisor
     
     mov [esp+15], byte 0 ; '\0' null terminator
-    mov [esp+14], byte 0ah ; LF
-    mov [esp+13], byte 0dh ; CR
+    mov [esp+14], byte 0xa ; LF
+    mov [esp+13], byte 0xd ; CR
     mov ebx, 13 ; string starting offset
 
     .prev_digit:
