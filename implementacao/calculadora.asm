@@ -142,7 +142,7 @@ _start:
     push msg5
     push msg5_sz
     call print_msg
-    
+
     push operacao
     push 4
     call read_msg ; waits for an ENTER '\n'
@@ -275,6 +275,24 @@ read_msg:
     mov edx, param1
     int 80h
 
+    mov ebx, param2
+    mov ecx, 0
+    .loop:
+    movzx eax, byte [ebx+ecx]
+    cmp eax, 0xd
+    je .break
+    cmp eax, 0xa
+    je .break
+    add ecx, 1
+    cmp ecx, param1
+    jb .loop
+
+    jmp .exit
+
+    .break:
+    mov byte [ebx+ecx], 0x0
+
+    .exit:
     leave
     ret 8
 
