@@ -12,6 +12,9 @@ section .data
     msg4 db "Vai trabalhar com 16 ou 32 bits (digite 0 para 16, e 1 para 32):", 0xd, 0xa
     msg4_sz equ $-msg4
 
+    msg5 db "Pressione ENTER para continuar...", 0xd, 0xa
+    msg5_sz equ $-msg5
+
     menu0 db "ESCOLHA UMA OPCAO:", 0xd, 0xa
     menu0_sz equ $-menu0
 
@@ -136,6 +139,10 @@ _start:
     int 80h
 
     continue:
+    push msg5
+    push msg5_sz
+    call print_msg
+    
     push operacao
     push 4
     call read_msg ; waits for an ENTER '\n'
