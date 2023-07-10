@@ -12,8 +12,29 @@ section .text
 %define local1 dword [ebp-4]
 %define local2 dword [ebp-8]
 
+%define local1_16 word [ebp-4]
+%define local2_16 word [ebp-6]
+
 mod16:
-    enter 0, 0
+    enter 4, 0 ; 2 variaveis locais
+
+    ;l lê os numeros
+    call read_num_16
+    mov local1_16, ax
+    
+    call read_num_16
+    mov local2_16,ax
+
+    mov ax, local1_16
+    mov cx, local2_16
+    xor dx,dx
+    idiv cx
+
+    ; imprime um numero
+    push dx
+    call print_num_16
+
+    leave
     ret
 
 mod32:

@@ -70,7 +70,7 @@ section .text
     extern mod16
     extern mod32
 
-%define param1_16 word [ebp+6]
+%define param1_16 word [ebp+8]
 %define param1 dword [ebp+8]
 %define param2 dword [ebp+12]
 

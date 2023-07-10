@@ -15,9 +15,87 @@ section .text
 %define param1 dword [ebp+8]
 %define param2 dword [ebp+12]
 
+%define local1_16 word [ebp-4]
+%define local2_16 word [ebp-6]
+
+%define param1_16 word [ebp+8]
+%define param2_16 word [ebp+10]
+
 exponenciacao16:
-    enter 0, 0
+    enter 4, 0 ; 2 variaveis locais
+
+    ; lê os numeros
+    call read_num_32
+    mov local1_16,ax
+
+    call read_num_16
+    mov local2_16,ax
+
+    mov ax, 1
+    mov cx, local2_16
+    cmp cx, 0
+    je .end
+    .lp:
+        imul ax, local1_16
+        loop .lp
+
+
+    ;push local2_16
+    ;push local1_16
+    ;call fexp16
+
+    ; imprime um numero
+    .end:
+    push ax
+    call print_num_16
+    
+    leave
     ret
+
+;fexp16: ;param1_16 = a, param2_16 = i
+;    enter 4,0
+;
+;    cmp param2_16, 0
+;    je .zero16
+;
+;    cmp param2_16, 1
+;    je .one16
+
+;    mov ax, param2_16
+;    mov cx, 2
+;    xor dx, dx
+;    idiv cx
+;    mov local2_16,dx
+;
+;    push ax
+;    push param1_16
+;    call fexp16
+;
+;    mov local1_16, ax
+;    mov ax, 1
+;
+;    cmp local2_16, 0
+;    je .even16
+;
+;    .odd16:
+;    imul ax, param1_16
+;
+;    .even16:
+;    imul ax, local1_16
+;    imul ax, local1_16
+;
+;    jmp .end16
+;
+;    .zero16:
+;    mov ax, 1
+;    jmp .end16
+;
+;    .one16:
+;    mov ax, param1_16
+;
+;    .end16:
+;    leave
+;    ret 4
 
 ; Não suporta expoente negativo!!!
 exponenciacao32:
