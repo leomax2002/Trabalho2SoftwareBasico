@@ -18,7 +18,8 @@ section .text
 mod16:
     enter 4, 0 ; 2 variaveis locais
 
-    ;l lê os numeros
+    ; lê os numeros
+    sub eax,eax
     call read_num_16
     mov local1_16, ax
     
@@ -27,7 +28,7 @@ mod16:
 
     mov ax, local1_16
     mov cx, local2_16
-    xor dx,dx
+    cwd
     idiv cx
 
     ; imprime um numero
@@ -49,7 +50,7 @@ mod32:
 
     mov eax, local1
     mov ecx, local2
-    xor edx, edx
+    cdq
     idiv ecx
 
     ; imprime um numero

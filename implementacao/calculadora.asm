@@ -15,6 +15,9 @@ section .data
     msg5 db "Pressione ENTER para continuar...", 0xd, 0xa
     msg5_sz equ $-msg5
 
+    msgOverflow db "Ocorreu Overflow. Fechando o programa...",0xd, 0xa
+    msgOverflow_sz EQU $-msgOverflow
+
     menu0 db "ESCOLHA UMA OPCAO:", 0xd, 0xa
     menu0_sz equ $-menu0
 
@@ -54,6 +57,11 @@ section .text
 
     global print_num_16
     global print_num_32
+
+    global msgOverflow
+    global msgOverflow_sz
+
+    global print_msg
 
     extern soma16
     extern soma32
@@ -134,6 +142,7 @@ _start:
     je op_mod
 
     ; .op_exit: syscall exit, return 0
+    exit_program:
     mov eax, 1
     mov ebx, 0
     int 80h
@@ -173,13 +182,30 @@ _start:
     op_mul:
         cmp byte [precisao], '1'
         je .32
-
+        sub ax,ax
+        push ax
         call multiplicacao16
+        pop ax
+        cmp ax, 1
+        je .overflowMul
         jmp continue
+
 
         .32:
+        sub eax,eax
+        push eax
         call multiplicacao32
+        pop eax
+        ;call print_num_32
+        cmp eax, 1
+        je .overflowMul
         jmp continue
+
+        .overflowMul:
+        push msgOverflow
+        push msgOverflow_sz
+        call print_msg
+        jmp exit_program
 
     op_div:
         cmp byte [precisao], '1'
@@ -195,13 +221,23 @@ _start:
     op_exp:
         cmp byte [precisao], '1'
         je .32
-
+        sub ax,ax
+        push ax
         call exponenciacao16
+        pop ax 
+        cmp ax, 1
+        je .overflowExp
         jmp continue
 
         .32:
         call exponenciacao32
         jmp continue
+
+        .overflowExp:
+        push msgOverflow
+        push msgOverflow_sz
+        call print_msg
+        jmp exit_program
 
     op_mod:
         cmp byte [precisao], '1'

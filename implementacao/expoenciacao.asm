@@ -9,6 +9,11 @@ section .text
     extern print_num_16
     extern print_num_32
 
+    extern msgOverflow
+    extern msgOverflow_sz
+
+    extern print_msg
+
 %define local1 dword [ebp-4]
 %define local2 dword [ebp-8]
 
@@ -36,7 +41,18 @@ exponenciacao16:
     cmp cx, 0
     je .end
     .lp:
-        imul ax, local1_16
+        imul local1_16
+        ;Verifica Overflow
+        cmp dx, 0x0000
+        je .continue_loop
+
+        cmp dx, 0xFFFF
+        je .continue_loop
+
+        mov word [ebp + 8], 1
+        jmp .next_instr16
+
+        .continue_loop:
         loop .lp
 
 
@@ -48,7 +64,7 @@ exponenciacao16:
     .end:
     push ax
     call print_num_16
-    
+    .next_instr16:
     leave
     ret
 
@@ -111,11 +127,9 @@ exponenciacao32:
     push local2
     push local1
     call fexp32
-
     ; imprime um numero
     push eax
     call print_num_32
-
     leave
     ret
 
@@ -131,7 +145,7 @@ fexp32: ; param1 = a, param2 = i
     mov eax, param2
     mov ecx, 2
     xor edx, edx
-    idiv ecx
+    div ecx
     mov local2, edx
 
     push eax
@@ -145,12 +159,22 @@ fexp32: ; param1 = a, param2 = i
     je .even
     
     .odd:
-    imul eax, param1
+    imul param1
+    cmp edx, 0x00000000
+    je .even
+    cmp edx, 0xFFFFFFFF
+    je .even
+    jmp .end_overflow
     
     .even:
-    imul eax, local1
-    imul eax, local1
-
+    imul local1
+    imul local1
+    cmp edx, 0x00000000
+    je .continue_fexp32
+    cmp edx, 0xFFFFFFFF
+    je .continue_fexp32
+    jmp .end_overflow
+    .continue_fexp32:
     jmp .end
 
     .zero:
@@ -163,3 +187,11 @@ fexp32: ; param1 = a, param2 = i
     .end:
     leave
     ret 8
+
+    .end_overflow:
+    push msgOverflow
+    push msgOverflow_sz
+    call print_msg
+    mov eax,1
+    mov ebx,0
+    int 0x80
