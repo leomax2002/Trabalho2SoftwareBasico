@@ -25,9 +25,10 @@ make clean
 make all
 ```
 ## Sistema Operacional Utilizado
-O Programa foi desenvolvido e testado utilizando o Sistema Operacional Ubuntu 22.04 via WSL (Windows Subsystem for Linux) em Windows 10 e também em instalação própria no Computador Pessoal.
 
+O Programa foi desenvolvido e testado utilizando o Sistema Operacional Ubuntu 22.04 via WSL (Windows Subsystem for Linux) em Windows 10 e também em instalação própria no Computador Pessoal.
 ## Autores
+
 200022172 - Leonardo Maximo Silva
 
 200028880 - Wallace Ben Teng Lin Wu
